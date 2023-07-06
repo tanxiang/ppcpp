@@ -1,4 +1,4 @@
-
+#include <string_view>
 #include <tensorflow/cc/client/client_session.h>
 #include <tensorflow/cc/framework/gradients.h>
 #include <tensorflow/cc/framework/scope.h>
@@ -15,7 +15,12 @@
 
 namespace tfcc {
 
-auto convBlock(tensorflow::Scope &scope, tensorflow::Tensor inputs, int filters,
+auto relu6Block(tensorflow::Scope &scope, tensorflow::Input inputs) {
+  auto relu6Output = tensorflow::ops::Relu6(scope, inputs);
+  return relu6Output;
+}
+
+auto convBlock(tensorflow::Scope &scope, tensorflow::Input inputs, int filters,
                float alpha, std::array<int, 2> kernelShape = { 3, 3 },
                std::array<int, 2> strides = { 1, 1 }) {
   auto convPad =
@@ -23,34 +28,22 @@ auto convBlock(tensorflow::Scope &scope, tensorflow::Tensor inputs, int filters,
                            { { 0, 0 }, { 1, 1 }, { 1, 1 }, { 0, 0 } });
 
   auto weightsInitial = tensorflow::ops::RandomNormal(
-      scope, tensorflow::ops::Const(scope,{kernelShape[0],kernelShape[1]} ), inputs.dtype());
+      scope, tensorflow::ops::Const(scope, { kernelShape[0], kernelShape[1] }),
+      inputs.data_type());
 
   auto weight = tensorflow::ops::Variable(
-      scope, {filters, kernelShape[0], kernelShape[1], 1 }, inputs.dtype());
+      scope, { filters, kernelShape[0], kernelShape[1], 1 },
+      inputs.data_type());
 
   tensorflow::ops::Assign(scope, weight, weightsInitial);
-  auto biases = tensorflow::ops::Variable(scope, { filters }, inputs.dtype());
-  tensorflow::Output o;
+  auto biases =
+      tensorflow::ops::Variable(scope, { filters }, inputs.data_type());
+  auto convOutput =
+      tensorflow::ops::Conv2D(scope.WithOpName("conv1"), convPad, weight,
+                              { 1, strides[0], strides[1], 1 },std::string{ "SAME"});
+
+  return relu6Block(scope, convOutput);
 }
-
-auto convBlock(tensorflow::Scope &scope, tensorflow::Input& inputs, int filters,
-               float alpha, std::array<int, 2> kernelShape = { 3, 3 },
-               std::array<int, 2> strides = { 1, 1 }) {
-  auto convPad =
-      tensorflow::ops::Pad(scope.WithOpName("pad0"), inputs,
-                           { { 0, 0 }, { 1, 1 }, { 1, 1 }, { 0, 0 } });
-
-  auto weightsInitial = tensorflow::ops::RandomNormal(
-      scope, tensorflow::ops::Const(scope,{kernelShape[0],kernelShape[1]} ), inputs.data_type());
-
-  auto weight = tensorflow::ops::Variable(
-      scope, { filters, kernelShape[0], kernelShape[1], 1 }, inputs.data_type());
-
-  tensorflow::ops::Assign(scope, weight, weightsInitial);
-  auto biases = tensorflow::ops::Variable(scope, { filters }, inputs.data_type());
-  tensorflow::Output o;
-}
-
 
 auto buildInputBlocks(tensorflow::Scope scope,
                       tensorflow::ops::Placeholder &input) {
