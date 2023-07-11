@@ -1,4 +1,3 @@
-#include <string_view>
 #include <tensorflow/cc/client/client_session.h>
 #include <tensorflow/cc/framework/gradients.h>
 #include <tensorflow/cc/framework/scope.h>
@@ -9,15 +8,38 @@
 #include <tensorflow/cc/ops/state_ops.h>
 #include <tensorflow/core/platform/env.h>
 
+
 #include <exception>
 #include <iostream>
 #include <memory>
 
 namespace tfcc {
 
-auto relu6Block(tensorflow::Scope &scope, tensorflow::Input inputs) {
-  auto relu6Output = tensorflow::ops::Relu6(scope, inputs);
-  return relu6Output;
+    auto imgDecode(std::string_view fileName,std::string_view inputName){
+	auto root = tensorflow::Scope::NewRootScope();
+	auto file_reader = tensorflow::ops::ReadFile(root.WithOpName(inputName), std::string{fileName});
+       	tensorflow::Output image_reader;
+
+	if (tensorflow::StringPiece(fileName).ends_with(".png")) {
+		image_reader = tensorflow::ops::DecodePng(root.WithOpName("png_reader"), file_reader,
+								tensorflow::ops::DecodePng::Channels(1));
+    }else if(tensorflow::StringPiece(fileName).ends_with(".gif")){
+		image_reader = tensorflow::ops::DecodeGif(root.WithOpName("gif_reader"), file_reader);
+    }else{
+		image_reader = tensorflow::ops::DecodeJpeg(root.WithOpName("jpg_reader"), file_reader);
+    }
+        return image_reader;
+    }
+
+auto active(tensorflow::Scope &scope, tensorflow::Input inputs) {
+  return tensorflow::ops::Relu6(scope, inputs);
+}
+
+auto denseBlock(tensorflow::Scope &scope, tensorflow::Input inputs, int in_units, int out_units) {
+  auto weight =  tensorflow::ops::Variable(scope.WithOpName("weight"), {in_units, out_units}, tensorflow::DT_FLOAT);
+  auto ba = tensorflow::ops::Variable(scope.WithOpName("Ba"), { out_units}, tensorflow::DT_FLOAT);
+  return tensorflow::ops::Add( scope.WithOpName("AddB"),tensorflow::ops::MatMul(scope.WithOpName("MatMulW"), inputs,weight),ba);
+
 }
 
 auto convBlock(tensorflow::Scope &scope, tensorflow::Input inputs, int filters,
@@ -42,7 +64,7 @@ auto convBlock(tensorflow::Scope &scope, tensorflow::Input inputs, int filters,
       tensorflow::ops::Conv2D(scope.WithOpName("conv1"), convPad, weight,
                               { 1, strides[0], strides[1], 1 },std::string{ "SAME"});
 
-  return relu6Block(scope, convOutput);
+  return active(scope, convOutput);
 }
 
 auto buildInputBlocks(tensorflow::Scope scope,
@@ -53,7 +75,8 @@ auto buildInputBlocks(tensorflow::Scope scope,
 auto buildPPC(const tensorflow::Scope &rootScope,
               tensorflow::ops::Placeholder &input,
               tensorflow::ops::Placeholder &output) {
-  auto input1 = buildInputBlocks(rootScope.NewSubScope("input0"), input);
+  auto output0 = buildInputBlocks(rootScope.NewSubScope("input0"), input);
+  return output0;
 }
 
 }  // namespace tfcc
@@ -71,11 +94,13 @@ int main(int argc, char *argv[]) {
     tensorflow::ops::Placeholder::Shape({ 1, 4, 3200, 1 })
   };
 
-  tfcc::buildPPC(rootScope, input0, outputBox);
+  auto output =  tfcc::buildPPC(rootScope, input0, outputBox);
 
   auto graph = rootScope.graph_as_shared_ptr();
 
   auto cSession = tensorflow::ClientSession{ rootScope };
+
+  //tensorflow::ops::ApplyAdam adam{};
 
   return 0;
 }
