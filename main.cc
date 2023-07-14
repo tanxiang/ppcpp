@@ -65,7 +65,9 @@ auto convPack(tensorflow::Scope scope, tensorflow::Output inputs, int filters,
   auto convPad =
       tensorflow::ops::Pad(scope.WithOpName("pad0"), inputs,
                            { { 0, 0 }, { 1, 1 }, { 1, 1 }, { 0, 0 } });
-  std::cout << inputs.type() << std::endl;
+
+  auto inputShape = tensorflow::ops::Shape(scope.WithOpName("Shape"),inputs);
+    std::cout << inputShape.node()->DebugString() << std::endl;
 
   auto weightsInitial = tensorflow::ops::RandomNormal(
       scope, tensorflow::ops::Const(scope, { kernelShape[0], kernelShape[1] }),
@@ -85,14 +87,14 @@ auto convPack(tensorflow::Scope scope, tensorflow::Output inputs, int filters,
       scope.WithOpName("conv"), convPad, weight,
       { 1, strides[0], strides[1], 1 }, std::string{ "SAME" });
 
-  return active(scope, convOutput);
+  return active(scope, tensorflow::ops::BiasAdd(scope.WithOpName("bias"),convOutput,biases));
 }
 
 auto Dropout(tensorflow::Scope scope, tensorflow::Input inputs) {}
 
 auto Flatten(tensorflow::Scope scope, tensorflow::Input inputs) {
-  auto flat =
-      tensorflow::ops::Reshape(scope.WithOpName("reshape"), inputs, { -1, 99 });
+ return 
+      tensorflow::ops::Reshape(scope.WithOpName("reshape"), inputs, { -1 });
 }
 
 auto Gap(tensorflow::Scope scope, tensorflow::Input inputs) {
