@@ -41,7 +41,7 @@ auto active(tensorflow::Scope &scope, tensorflow::Input inputs) {
 auto dense(tensorflow::Scope &scope, tensorflow::Input inputs, int in_units,
            int out_units) {
     auto inputShape = tensorflow::ops::Shape(scope.WithOpName("shape"),inputs);
-    auto weightShape = tensorflow::ops::Concat(scope.WithOpName("apppend"),{inputShape},0);
+    auto weightShape = tensorflow::ops::Concat(scope.WithOpName("apppend"),{inputShape.output,tensorflow::ops::Const(scope, { out_units })},0);
   auto weightsInitial = tensorflow::ops::RandomNormal(
       scope, inputShape,inputShape.output.type());
 
