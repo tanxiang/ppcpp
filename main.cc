@@ -40,10 +40,11 @@ auto active(tensorflow::Scope &scope, tensorflow::Input inputs) {
 
 auto dense(tensorflow::Scope &scope, tensorflow::Input inputs, int in_units,
            int out_units) {
+    auto inputShape = tensorflow::ops::Shape(scope.WithOpName("shape"),inputs);
+    auto weightShape = tensorflow::ops::Concat(scope.WithOpName("apppend"),{inputShape},0);
   auto weightsInitial = tensorflow::ops::RandomNormal(
-      scope, tensorflow::ops::Const(scope, { in_units, out_units }),
-      inputs.data_type());
-  inputs.tensor().dim_size(0);
+      scope, inputShape,inputShape.output.type());
+
   auto weight = tensorflow::ops::Variable(
       scope.WithOpName("weight"), { in_units, out_units }, inputs.data_type());
 
@@ -67,7 +68,7 @@ auto convPack(tensorflow::Scope scope, tensorflow::Output inputs, int filters,
                            { { 0, 0 }, { 1, 1 }, { 1, 1 }, { 0, 0 } });
 
   auto inputShape = tensorflow::ops::Shape(scope.WithOpName("Shape"),inputs);
-    std::cout << inputShape.node()->DebugString() << std::endl;
+  //  std::cout << inputShape.node()->DebugString() << std::endl;
 
   auto weightsInitial = tensorflow::ops::RandomNormal(
       scope, tensorflow::ops::Const(scope, { kernelShape[0], kernelShape[1] }),
@@ -95,12 +96,11 @@ auto Dropout(tensorflow::Scope scope, tensorflow::Input inputs) {
 }
 
 auto Flatten(tensorflow::Scope scope, tensorflow::Input inputs) {
- return 
-      tensorflow::ops::Reshape(scope.WithOpName("reshape"), inputs, { -1 });
+ return tensorflow::ops::Reshape(scope.WithOpName("reshape"), inputs, { -1 });
 }
 
 auto Gap(tensorflow::Scope scope, tensorflow::Input inputs) {
-   return tensorflow::ops::AvgPool(scope, inputs, {-1});
+   //return tensorflow::ops::AvgPool(scope, inputs, {-1});
 }
 
 auto buildInputBlocks(tensorflow::Scope scope,
