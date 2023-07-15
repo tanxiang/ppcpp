@@ -90,7 +90,9 @@ auto convPack(tensorflow::Scope scope, tensorflow::Output inputs, int filters,
   return active(scope, tensorflow::ops::BiasAdd(scope.WithOpName("bias"),convOutput,biases));
 }
 
-auto Dropout(tensorflow::Scope scope, tensorflow::Input inputs) {}
+auto Dropout(tensorflow::Scope scope, tensorflow::Input inputs) {
+
+}
 
 auto Flatten(tensorflow::Scope scope, tensorflow::Input inputs) {
  return 
@@ -98,7 +100,7 @@ auto Flatten(tensorflow::Scope scope, tensorflow::Input inputs) {
 }
 
 auto Gap(tensorflow::Scope scope, tensorflow::Input inputs) {
-  // auto flat = tensorflow::ops::AvgPool(scope, inputs, {-1, 88});
+   return tensorflow::ops::AvgPool(scope, inputs, {-1});
 }
 
 auto buildInputBlocks(tensorflow::Scope scope,
