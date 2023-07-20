@@ -12,5 +12,4 @@ set_property(TARGET pcp PROPERTY CXX_STANDARD 23)
 
 target_include_directories(pcp PUBLIC ${TFCC_INCLUDE_DIRS})
 
-target_link_libraries(pcp PUBLIC
-        PkgConfig::TFCC)
+target_link_libraries(pcp PUBLIC PkgConfig::TFCC)
