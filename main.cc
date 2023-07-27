@@ -125,7 +125,7 @@ auto buildPPC(tf::Scope rootScope, tfo::Placeholder& input,
 
 int main(int argc, char* argv[])
 {
-    auto rootScope = tensorflow::Scope::NewRootScope();
+    auto rootScope = tensorflow::Scope::NewRootScope().ExitOnError();
     auto input0 = tensorflow::ops::Placeholder { rootScope, tensorflow::DT_FLOAT, tensorflow::ops::Placeholder::Shape({ 1, 512, 512, 1 }) };
     auto outputBox = tensorflow::ops::Placeholder { rootScope, tensorflow::DT_FLOAT, tensorflow::ops::Placeholder::Shape({ 1, 4, 3200, 1 }) };
 
