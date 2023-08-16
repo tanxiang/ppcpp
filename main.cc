@@ -1,3 +1,8 @@
+#include <exception>
+#include <iostream>
+#include <memory>
+#include <string_view>
+
 #include <tensorflow/cc/client/client_session.h>
 #include <tensorflow/cc/framework/gradients.h>
 #include <tensorflow/cc/framework/scope.h>
@@ -7,10 +12,6 @@
 #include <tensorflow/cc/ops/standard_ops.h>
 #include <tensorflow/cc/ops/state_ops.h>
 #include <tensorflow/core/platform/env.h>
-
-#include <exception>
-#include <iostream>
-#include <memory>
 
 namespace tfcc {
 
@@ -23,9 +24,9 @@ auto imgDecode(std::string_view fileName, std::string_view inputName)
     auto file_reader = tfo::ReadFile(root.WithOpName(inputName), std::string { fileName });
     tf::Output image_reader;
 
-    if (tf::StringPiece(fileName).ends_with(".png")) {
+    if (fileName.ends_with(".png")) {
         image_reader = tfo::DecodePng(root.WithOpName("pngReader"), file_reader, tfo::DecodePng::Channels(1));
-    } else if (tf::StringPiece(fileName).ends_with(".gif")) {
+    } else if (fileName.ends_with(".gif")) {
         image_reader = tfo::DecodeGif(root.WithOpName("gifReader"), file_reader);
     } else {
         image_reader = tfo::DecodeJpeg(root.WithOpName("jpgReader"), file_reader);
@@ -113,9 +114,9 @@ auto buildPPC(tf::Scope rootScope, tfo::Placeholder& input,
     tf::Output x = buildInputBlocks(rootScope.NewSubScope("head"), input);
     //std::cout<<x.operator tensorflow::Output().type();
     
-    //x = buildInputBlocks(rootScope.NewSubScope("head1"), x);
+   // x = buildInputBlocks(rootScope.NewSubScope("head1"), x);
   //  x = buildInputBlocks(rootScope.NewSubScope("head2"), x);
-   x = Flatten(rootScope.NewSubScope("head3"),x);
+   //x = Flatten(rootScope.NewSubScope("head3"),x);
     //x = Dense(rootScope.NewSubScope("body0"),x,256);
 
     return x;
@@ -133,7 +134,7 @@ int main(int argc, char* argv[])
     auto graph = rootScope.graph_as_shared_ptr();
     auto cSession = tensorflow::ClientSession { rootScope };
 
-    // tensorflow::ops::ApplyAdam adam{};
+    //tensorflow::ops::ApplyAdam adam{};
 
     return 0;
 }

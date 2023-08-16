@@ -8,7 +8,7 @@ pkg_check_modules(TFCC REQUIRED IMPORTED_TARGET tensorflow_cc)
 
 add_executable(pcp main.cc)
 
-set_property(TARGET pcp PROPERTY CXX_STANDARD 23)
+set_property(TARGET pcp PROPERTY CXX_STANDARD 20)
 
 target_include_directories(pcp PUBLIC ${TFCC_INCLUDE_DIRS})
 
