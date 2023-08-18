@@ -66,9 +66,9 @@ auto Conv(tf::Scope scope, tf::Output inputs, int filters, int channel = 1, std:
     auto inputShape = tfo::Shape(scope.WithOpName("Shape"), inputs);
     std::cout << inputShape.node()->DebugString() << std::endl;
 
-    auto weightsInitial = tfo::RandomNormal(scope, tfo::Const(scope, { filters, kernelShape[0], kernelShape[1], channel  }), inputs.type());
+    auto weightsInitial = tfo::RandomNormal(scope, tfo::Const(scope, { filters, kernelShape[0], kernelShape[1], filters  }), inputs.type());
 
-    auto weight = tfo::Variable(scope, { filters, kernelShape[0], kernelShape[1], channel }, inputs.type());
+    auto weight = tfo::Variable(scope, { filters, kernelShape[0], kernelShape[1], filters }, inputs.type());
     tfo::Assign(scope, weight, weightsInitial);
 
 
@@ -83,7 +83,7 @@ auto Conv(tf::Scope scope, tf::Output inputs, int filters, int channel = 1, std:
     tfo::Assign(scope, biases, tf::Input::Initializer(0.f, { filters }));
 
     //return convOutput;
-    auto badd = tfo::BiasAdd(scope.WithOpName("bias"), convOutput, biases);
+    auto badd = tfo::BiasAdd(scope.WithOpName("bias"), convOutput.output, biases);
     if(badd.node()){
 
     }
@@ -103,16 +103,15 @@ auto Gap(tf::Scope scope, tf::Input inputs)
     // return tfo::AvgPool(scope, inputs, {-1});
 }
 
-auto buildInputBlocks(tf::Scope scope,tf::Output input)
+auto buildInputBlocks(tf::Scope scope,auto& input)
 {
-    return tfcc::Conv(scope.NewSubScope("conv0"), input, 12);
+    return tfcc::Conv(scope.NewSubScope("conv0"), input, 1);
 }
 
-auto buildPPC(tf::Scope rootScope, tfo::Placeholder& input,
-    tfo::Placeholder& output)
+auto buildPPC(tf::Scope rootScope,auto& input,
+    auto& output)
 {
     tf::Output x = buildInputBlocks(rootScope.NewSubScope("head"), input);
-    //std::cout<<x.operator tensorflow::Output().type();
     
    // x = buildInputBlocks(rootScope.NewSubScope("head1"), x);
   //  x = buildInputBlocks(rootScope.NewSubScope("head2"), x);
@@ -127,7 +126,7 @@ auto buildPPC(tf::Scope rootScope, tfo::Placeholder& input,
 int main(int argc, char* argv[])
 {
     auto rootScope = tensorflow::Scope::NewRootScope().ExitOnError();
-    auto input0 = tensorflow::ops::Placeholder { rootScope, tensorflow::DT_FLOAT, tensorflow::ops::Placeholder::Shape({ 1, 512, 512, 1 }) };
+    auto input0 = tensorflow::ops::Placeholder { rootScope, tensorflow::DT_FLOAT, tensorflow::ops::Placeholder::Shape({ 1, 512, 512, 3 }) };
     auto outputBox = tensorflow::ops::Placeholder { rootScope, tensorflow::DT_FLOAT, tensorflow::ops::Placeholder::Shape({ 1, 4, 3200, 1 }) };
 
     auto output = tfcc::buildPPC(rootScope.NewSubScope("ppcpp"), input0, outputBox);
