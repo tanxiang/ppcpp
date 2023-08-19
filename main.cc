@@ -14,6 +14,7 @@
 #include <tensorflow/cc/ops/state_ops.h>
 #include <tensorflow/core/graph/graph.h>
 #include <tensorflow/core/platform/env.h>
+#include "log.hh"
 
 namespace tfcc {
 
@@ -38,7 +39,7 @@ auto imgDecode(std::string_view fileName, std::string_view inputName)
 
 auto active(tf::Scope& scope, tf::Output inputs)
 {
-    std::cout << inputs.name() << '\n';
+    //std::cout << inputs.name() << '\n';
 
     auto relu = tfo::Relu6(scope.WithOpName("relu6"), inputs);
 
@@ -77,10 +78,10 @@ auto Conv(tf::Scope scope, auto& inputs, int filters, std::array<int, 2> kernelS
 
         auto convOutput = tfo::Conv2D(scope.WithOpName("Conv"), inputs, weight, { filters, strides[0], strides[1], inChannel }, std::string { "SAME" });
         // if(convOutput.node())        std::cout << convOutput.node()->DebugString() << std::endl;
-        std::cout << convOutput.node()->DebugString() << std::endl;
+        ALOG(INFO) << convOutput.node()->DebugString();
 
         auto convShape = tfo::Shape(scope.WithOpName("Shape"), convOutput.output);
-        std::cout << convShape.operation.input_type(0) << std::endl;
+        //std::cout << convShape.operation.input_type(0) << std::endl;
 
         auto biases = tfo::Variable(scope, { filters }, inputs.output.type());
         tfo::Assign(scope, biases, tf::Input::Initializer(0.f, { filters }));
