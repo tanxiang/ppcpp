@@ -8,6 +8,8 @@ namespace tt {
 enum class LogLevel {
     STD_INFO,
     STD_ERROR,
+        STD_MSG,
+
 };
 
 class ss {
@@ -23,10 +25,13 @@ public:
     {
         switch (m_logLevel) {
         case LogLevel::STD_ERROR:
-            std::cerr << m_ss.str() << std::endl;
+            std::cerr << "\033[0;31m" << m_ss.str() <<"\033[0m"<< std::endl;
             break;
         case LogLevel::STD_INFO:
             std::cout << m_ss.str() << std::endl;
+            break;
+        case LogLevel::STD_MSG:
+            std::cout << "\033[0;32m" << m_ss.str() <<"\033[0m"<<  std::endl;
             break;
         }
     }

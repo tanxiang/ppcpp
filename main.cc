@@ -77,11 +77,11 @@ auto Conv(tf::Scope scope, auto& inputs, int filters, std::array<int, 2> kernelS
         tfo::Assign(scope, weight, weightsInitial);
 
         auto convOutput = tfo::Conv2D(scope.WithOpName("Conv"), inputs, weight, { filters, strides[0], strides[1], inChannel }, std::string { "SAME" });
-        // if(convOutput.node())        std::cout << convOutput.node()->DebugString() << std::endl;
+        // if(convOutt.node())        std::cout << convOutput.node()->DebugString() << std::endl;
         ALOG(INFO) << convOutput.node()->DebugString();
 
         auto convShape = tfo::Shape(scope.WithOpName("Shape"), convOutput.output);
-        //std::cout << convShape.operation.input_type(0) << std::endl;
+        //ALOG(ERROR) << convShape.operation.input_type(0) ;
 
         auto biases = tfo::Variable(scope, { filters }, inputs.output.type());
         tfo::Assign(scope, biases, tf::Input::Initializer(0.f, { filters }));
