@@ -25,7 +25,7 @@ namespace tfcc {
 namespace tf = tensorflow;
 namespace tfo = tensorflow::ops;
 
-tfo::ReaderRead getReader(tf::Scope& scope)
+tfo::ParseSingleExample getReader(tf::Scope& scope)
 {
     // tfo::TFRecordReader reader { scope ,tfo::TFRecordReader::Attrs{}.SharedName("trainData")};
 
@@ -41,24 +41,34 @@ tfo::ReaderRead getReader(tf::Scope& scope)
 
     tfo::ReaderRead read { scope.WithOpName("readQueue"), tfo::TFRecordReader { scope.WithOpName("tfrReader") }, queue };
 
+        tfo::ReaderReadUpTo readm { scope.WithOpName("readQueue"), tfo::TFRecordReader { scope.WithOpName("tfrReader") }, queue ,64ll};
+
+
     tfo::ParseSingleExample example { scope.WithOpName("example"),
         { read.value },
         { tfo::Const<tf::string>(scope.WithOpName("dense_def0"), "", { 1 }),
-            tfo::Const<tf::int64>(scope.WithOpName("dense_def1"), 1, { 1, 1 }) },
+            tfo::Const<tf::int64>(scope.WithOpName("dense_def1"), 1, { 1 }) },
         0, {}, { "image", "label" }, {}, { { 1 }, { 1 } } };
+
+       // tfo::ParseExample examples{scope.WithOpName("examples"),{readm.values},{},};
 
     tf::ClientSession cs { scope };
     std::vector<tf::Tensor> tensorOut;
     auto runStatus = cs.Run({ { fileName, "../data/test1.tfr" } },  {},{ en }, &tensorOut);
-    runStatus = cs.Run({  }, {}, { close }, &tensorOut);
-    runStatus = cs.Run({  },  { queueSize }, &tensorOut);
+    runStatus = cs.Run({}, {}, { close }, &tensorOut);
+    runStatus = cs.Run({},  { queueSize }, &tensorOut);
 
     ALOG(MSG)<<tensorOut.size()<<'\t'<<tensorOut[0].DebugString();
-    ALOG(MSG) << runStatus.code();
+    
+        std::vector<tf::Tensor> imgs,labels;
+
+    runStatus = cs.Run({},  { example.dense_values[0] ,example.dense_values[1]}, {&imgs});
+
+    ALOG(MSG) << imgs.size()<<'\t'<< imgs[1].DebugString();
     
     //    tf::QueueRunner::New(queue_runner_def, &qr);
     //    tf::ClientSession cs;
-    return read;
+    return example;
 }
 
 }

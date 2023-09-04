@@ -1,5 +1,5 @@
 #pragma once
-#include <tensorflow/cc/ops/io_ops.h>
+#include <tensorflow/cc/ops/parsing_ops.h>
 namespace tfcc {
-tensorflow::ops::ReaderRead getReader(tensorflow::Scope& scope);
+tensorflow::ops::ParseSingleExample getReader(tensorflow::Scope& scope);
 }
