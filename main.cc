@@ -134,7 +134,7 @@ int main(int argc, char* argv[])
     auto input0 = tensorflow::ops::Placeholder { rootScope, tensorflow::DT_FLOAT }; //, tensorflow::ops::Placeholder::Shape({ 1, 512, 512, 1 }) };
     auto outputBox = tensorflow::ops::Placeholder { rootScope, tensorflow::DT_FLOAT }; //, tensorflow::ops::Placeholder::Shape({ 1, 4, 3200, 1 }) };
 
-    auto output = tfcc::buildPPC(rootScope.NewSubScope("ppcpp"), input0, outputBox);
+   // auto output = tfcc::buildPPC(rootScope.NewSubScope("ppcpp"), input0, outputBox);
     auto graph = rootScope.graph_as_shared_ptr();
     //auto cSession = tensorflow::ClientSession { rootScope };
 

@@ -1,5 +1,5 @@
 #pragma once
-#include <tensorflow/cc/ops/dataset_ops_internal.h>
+#include <tensorflow/cc/ops/io_ops.h>
 namespace tfcc {
-tensorflow::ops::internal::TFRecordDataset getReader(tensorflow::Scope& scope);
+tensorflow::ops::ReaderRead getReader(tensorflow::Scope& scope);
 }
