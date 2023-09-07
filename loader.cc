@@ -50,16 +50,17 @@ tfo::ParseSingleExample getReader(tf::Scope& scope)
         0, {}, { "image", "label" }, {}, { { 1 }, { 1 } } };
 
     // tfo::ParseExample examples{scope.WithOpName("examples"),{readm.values},{},};
-    tfo::ReaderReadUpTo readm { scope.WithOpName("readQueueUpTo"), tfo::TFRecordReader { scope.WithOpName("tfrReader") }, queue, 2ll };
+    tfo::ReaderReadUpTo readm { scope.WithOpName("readQueueUpTo"), tfo::TFRecordReader { scope.WithOpName("tfrReader") }, queue, 64ll };
 
-    
     tfo::ParseExample examples { scope.WithOpName("examples"),
-        { readm.values },{"example","2"}, tf::gtl::ArraySlice<tf::Input>{},
-        { "image", "label" },
-        { tfo::Const<tf::string>(scope.WithOpName("dense_def0"), {"",}, { 1 }),
-            tfo::Const<tf::int64>(scope.WithOpName("dense_def1"), {1,}, { 1 }) },
-        {}, {{ 1 }, { 1} }};
-    
+        { readm.values },tfo::Const<tf::string>(scope.WithOpName("noName"), {}, { 0 }),
+        tf::gtl::ArraySlice<tf::Input> {}, { "image", "label" },
+        {
+            tfo::Const<tf::string>(scope.WithOpName("dense_def0"), {"",},{ 1 }),
+            tfo::Const<tf::int64>(scope.WithOpName("dense_def1"), {1,},{ 1 }) 
+        },
+        {}, { { 1 }, { 1 } } };
+
     tf::ClientSession cs { scope };
     std::vector<tf::Tensor> tensorOut;
     auto runStatus = cs.Run({ { fileName, "../data/test1.tfr" } }, {}, { en }, &tensorOut);
