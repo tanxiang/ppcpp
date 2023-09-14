@@ -127,15 +127,20 @@ auto buildPPC(tf::Scope rootScope, auto& input,
 int main(int argc, char* argv[])
 {
     auto rootScope = tensorflow::Scope::NewRootScope().ExitOnError();
-    auto tfr = tfcc::getReader(rootScope,"../data/test1.tfr",64);
+    auto cSession = tensorflow::ClientSession { rootScope };
+
+    auto tfr = tfcc::getReader(rootScope,cSession,"../data/test1.tfr",64);
 
 
-    //std::vector<tensorflow::Tensor> imgs;
-    //auto cSession = tensorflow::ClientSession { rootScope };
+    std::vector<tensorflow::Tensor> imgs;
 
-    //auto runStatus = cSession.Run({}, { tfr.dense_values[0], tfr.dense_values[1] }, &imgs);
+    auto runStatus = cSession.Run({}, { std::get<0>(tfr),  std::get<1>(tfr) }, &imgs);
 
-    //ALOG(ERROR) << imgs.size() << '\t' << imgs[1].DebugString();
+    ALOG(MSG) <<runStatus.message() << '\t' << imgs[0].DebugString();
+
+    runStatus = cSession.Run({}, { std::get<0>(tfr),  std::get<1>(tfr) }, &imgs);
+
+    ALOG(MSG) <<runStatus.message() << '\t' << imgs[0].DebugString();
 
     //cSession.Run(tfr.node());
 

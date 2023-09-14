@@ -1,4 +1,5 @@
 #include "loader.hh"
+#include <algorithm>
 #include <string>
 #include <string_view>
 #include <tensorflow/cc/client/client_session.h>
@@ -30,9 +31,9 @@ namespace tfcc {
 namespace tf = tensorflow;
 namespace tfo = tensorflow::ops;
 
-tfo::ParseExample getReader(tf::Scope& scope,const std::string fileName,int64_t numRecoder)
+
+std::tuple<tensorflow::Output,tensorflow::Output> getReader(tf::Scope& scope,tf::ClientSession& cs,const std::string fileName,int64_t numRecoder)
 {
-        tf::ClientSession cs { scope };
 
     // tfo::TFRecordReader reader { scope ,tfo::TFRecordReader::Attrs{}.SharedName("trainData")};
 
@@ -72,18 +73,20 @@ tfo::ParseExample getReader(tf::Scope& scope,const std::string fileName,int64_t 
     std::vector<tf::Output> imageTensors;
     for(auto& imgRaw:exampleImgRaw.output){
         tfo::Cast imageTensorFloat{scope.WithOpName("floatCaster"), tfo::DecodeImage{scope,tfo::Unstack{scope.WithOpName("unstack"),imgRaw,1}[0]},tf::DT_FLOAT};
-        tfo::ResizeBilinear imageTensorFloatResize{scope.WithOpName("Resize"), tfo::ExpandDims{scope,imageTensorFloat,0}, tfo::Const(scope, { 128, 128 })};
+        tfo::ResizeBilinear imageTensorFloatResize{scope.WithOpName("resize"), tfo::ExpandDims{scope,imageTensorFloat,0}, tfo::Const(scope, { 128, 128 })};
         imageTensors.emplace_back( tfo::Div{scope.WithOpName("div"),imageTensorFloatResize,{255.f}});
     }
     //tfo::DecodeImage image{scope.WithOpName("img")};
-    tfo::Concat imageTensor{scope.WithOpName("Concat"),tf::InputList{imageTensors},0};
+    tfo::Concat imageTensor{scope.WithOpName("concat"),tf::InputList{imageTensors},0};
 
-    auto imageTensor0 = tfo::DecodeImage{scope,tfo::Unstack{scope.WithOpName("unstack"),exampleImgRaw.output[0],1}[0]};
 
     std::vector<tf::Tensor> tensorOut;
+    //tf::ClientSession cs { scope };
+
     auto runStatus = cs.Run({ { fileNameSpace, fileName } }, {}, { en }, &tensorOut);
     runStatus = cs.Run({}, {}, { close }, &tensorOut);
     //runStatus = cs.Run({}, { queueSize }, &tensorOut);
+    return {examples.dense_values[1],imageTensor};
 
     ALOG(MSG) << imageTensors.size() << '\t' ;
 
@@ -96,7 +99,6 @@ tfo::ParseExample getReader(tf::Scope& scope,const std::string fileName,int64_t 
 
     //    tf::QueueRunner::New(queue_runner_def, &qr);
     //    tf::ClientSession cs;
-    return examples;
 }
 
 }
