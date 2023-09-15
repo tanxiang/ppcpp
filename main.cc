@@ -129,7 +129,7 @@ int main(int argc, char* argv[])
     auto rootScope = tensorflow::Scope::NewRootScope().ExitOnError();
     auto cSession = tensorflow::ClientSession { rootScope };
 
-    auto tfr = tfcc::getReader(rootScope,cSession,"../data/test1.tfr",64);
+    auto tfr = tfcc::getReader(rootScope,cSession,{"../data/test1.tfr"},64);
 
 
     std::vector<tensorflow::Tensor> imgs;

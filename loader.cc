@@ -32,20 +32,15 @@ namespace tf = tensorflow;
 namespace tfo = tensorflow::ops;
 
 
-std::tuple<tensorflow::Output,tensorflow::Output> getReader(tf::Scope& scope,tf::ClientSession& cs,const std::string fileName,int64_t numRecoder)
+std::tuple<tensorflow::Output,tensorflow::Output> getReader(tf::Scope& scope,tf::ClientSession& cs,std::vector<std::string> fileNames,int64_t numRecoder)
 {
     tfo::Placeholder fileNameSpace { scope.WithOpName("tfrFileName"), tf::DT_STRING };
 
     tfo::FIFOQueue queue { scope.WithOpName("inputQueue"), { tf::DT_STRING } };
-
     tfo::QueueEnqueue enQueue { scope.WithOpName("queueEn"), queue, { fileNameSpace.output } };
-
     tfo::QueueClose close { scope.WithOpName("queueClose"), queue };
-
-    tfo::QueueSize queueSize { scope.WithOpName("sizeofQueue"), queue };
-
+    
     tfo::ReaderReadUpTo readm { scope.WithOpName("readQueueUpTo"), tfo::TFRecordReader { scope.WithOpName("tfrReader") }, queue, numRecoder };
-
     tfo::ParseExample examples {
         scope.WithOpName("examples"),
         { readm.values },tfo::Const<tf::string>(scope.WithOpName("noName"), {}, { 0 }),
@@ -66,8 +61,9 @@ std::tuple<tensorflow::Output,tensorflow::Output> getReader(tf::Scope& scope,tf:
     }
     tfo::Concat imageTensor{scope.WithOpName("concat"),tf::InputList{imageTensors},0};
     std::vector<tf::Tensor> tensorOut;
-    auto runStatus = cs.Run({ { fileNameSpace, fileName } }, {}, { enQueue }, &tensorOut);
-    runStatus = cs.Run({}, {}, { close }, &tensorOut);
+    for(auto&fileName:fileNames)
+        auto runStatus = cs.Run({ { fileNameSpace, fileName } }, {}, { enQueue }, &tensorOut);
+    auto runStatus = cs.Run({}, {}, { close }, &tensorOut);
 
     return {examples.dense_values[1],imageTensor};
 }
