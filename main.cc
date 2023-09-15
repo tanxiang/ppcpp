@@ -140,7 +140,7 @@ int main(int argc, char* argv[])
 
     runStatus = cSession.Run({}, { std::get<0>(tfr),  std::get<1>(tfr) }, &imgs);
 
-    ALOG(MSG) <<runStatus.message() << '\t' << imgs[0].DebugString();
+    ALOG(MSG) <<runStatus.message() << '\t' << imgs[1].DebugString();
 
     //cSession.Run(tfr.node());
 

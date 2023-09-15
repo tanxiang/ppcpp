@@ -34,28 +34,16 @@ namespace tfo = tensorflow::ops;
 
 std::tuple<tensorflow::Output,tensorflow::Output> getReader(tf::Scope& scope,tf::ClientSession& cs,const std::string fileName,int64_t numRecoder)
 {
-
-    // tfo::TFRecordReader reader { scope ,tfo::TFRecordReader::Attrs{}.SharedName("trainData")};
-
     tfo::Placeholder fileNameSpace { scope.WithOpName("tfrFileName"), tf::DT_STRING };
 
     tfo::FIFOQueue queue { scope.WithOpName("inputQueue"), { tf::DT_STRING } };
 
-    tfo::QueueEnqueue en { scope.WithOpName("queueEn"), queue, { fileNameSpace.output } };
+    tfo::QueueEnqueue enQueue { scope.WithOpName("queueEn"), queue, { fileNameSpace.output } };
 
     tfo::QueueClose close { scope.WithOpName("queueClose"), queue };
 
     tfo::QueueSize queueSize { scope.WithOpName("sizeofQueue"), queue };
 
-    /*tfo::ReaderRead read { scope.WithOpName("readQueue"), tfo::TFRecordReader { scope.WithOpName("tfrReader") }, queue };
-
-    tfo::ParseSingleExample example { scope.WithOpName("example"),
-        { read.value },
-        { tfo::Const<tf::string>(scope.WithOpName("dense_def0"), "", { 1 }),
-            tfo::Const<tf::int64>(scope.WithOpName("dense_def1"), 1, { 1 }) },
-        0, {}, { "image", "label" }, {}, { { 1 }, { 1 } } };
-*/
-    // tfo::ParseExample examples{scope.WithOpName("examples"),{readm.values},{},};
     tfo::ReaderReadUpTo readm { scope.WithOpName("readQueueUpTo"), tfo::TFRecordReader { scope.WithOpName("tfrReader") }, queue, numRecoder };
 
     tfo::ParseExample examples {
@@ -76,29 +64,12 @@ std::tuple<tensorflow::Output,tensorflow::Output> getReader(tf::Scope& scope,tf:
         tfo::ResizeBilinear imageTensorFloatResize{scope.WithOpName("resize"), tfo::ExpandDims{scope,imageTensorFloat,0}, tfo::Const(scope, { 128, 128 })};
         imageTensors.emplace_back( tfo::Div{scope.WithOpName("div"),imageTensorFloatResize,{255.f}});
     }
-    //tfo::DecodeImage image{scope.WithOpName("img")};
     tfo::Concat imageTensor{scope.WithOpName("concat"),tf::InputList{imageTensors},0};
-
-
     std::vector<tf::Tensor> tensorOut;
-    //tf::ClientSession cs { scope };
-
-    auto runStatus = cs.Run({ { fileNameSpace, fileName } }, {}, { en }, &tensorOut);
+    auto runStatus = cs.Run({ { fileNameSpace, fileName } }, {}, { enQueue }, &tensorOut);
     runStatus = cs.Run({}, {}, { close }, &tensorOut);
-    //runStatus = cs.Run({}, { queueSize }, &tensorOut);
+
     return {examples.dense_values[1],imageTensor};
-
-    ALOG(MSG) << imageTensors.size() << '\t' ;
-
-    std::vector<tf::Tensor> imgs;
-
-    runStatus = cs.Run({}, {  examples.dense_values[1],imageTensor }, &imgs);
-
-    ALOG(MSG) <<runStatus.message() << '\t'<< imgs.size() << '\t' << imgs[1].DebugString();
-
-
-    //    tf::QueueRunner::New(queue_runner_def, &qr);
-    //    tf::ClientSession cs;
 }
 
 }
