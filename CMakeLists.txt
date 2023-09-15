@@ -6,7 +6,7 @@ find_package(PkgConfig REQUIRED)
 
 pkg_check_modules(TFCC REQUIRED IMPORTED_TARGET tensorflow_cc)
 
-add_executable(pcp main.cc loader.cc)
+add_executable(pcp main.cc loader.cc model.cc)
 
 add_executable(test test.cc)
 
