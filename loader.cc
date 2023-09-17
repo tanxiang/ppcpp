@@ -1,9 +1,5 @@
 #include "loader.hh"
-#include <algorithm>
-#include <string>
-#include <string_view>
 #include <tensorflow/cc/client/client_session.h>
-#include <tensorflow/cc/framework/ops.h>
 #include <tensorflow/cc/framework/scope.h>
 #include <tensorflow/cc/ops/array_ops.h>
 #include <tensorflow/cc/ops/const_op.h>
@@ -13,7 +9,6 @@
 #include <tensorflow/cc/ops/experimental_dataset_ops.h>
 #include <tensorflow/cc/ops/image_ops.h>
 #include <tensorflow/cc/ops/io_ops.h>
-#include <tensorflow/cc/ops/parsing_ops.h>
 #include <tensorflow/cc/training/queue_runner.h>
 
 #include <tensorflow/core/example/example.pb.h>
@@ -22,7 +17,6 @@
 #include <tensorflow/core/framework/types.pb.h>
 
 #include <tensorflow/core/platform/types.h>
-#include <vector>
 
 #include "log.hh"
 

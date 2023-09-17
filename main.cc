@@ -34,10 +34,10 @@ int main(int argc, char* argv[])
     auto nnScope = tensorflow::Scope::NewRootScope().ExitOnError();
 
 
-    auto input0 = tensorflow::ops::Placeholder { nnScope, tensorflow::DT_FLOAT }; //, tensorflow::ops::Placeholder::Shape({ 1, 512, 512, 1 }) };
-    auto outputBox = tensorflow::ops::Placeholder { nnScope, tensorflow::DT_FLOAT }; //, tensorflow::ops::Placeholder::Shape({ 1, 4, 3200, 1 }) };
+    auto input0 = tensorflow::ops::Placeholder { nnScope, tensorflow::DT_FLOAT , tensorflow::ops::Placeholder::Shape({ 1, 512, 512, 3 }) };
+    auto outputBox = tensorflow::ops::Placeholder { nnScope, tensorflow::DT_FLOAT , tensorflow::ops::Placeholder::Shape({ 1, 4, 3200, 1 }) };
 
-   // auto output = tfcc::buildPPC(rootScope.NewSubScope("ppcpp"), input0, outputBox);
+    auto output = tfcc::buildPPC(nnScope.NewSubScope("ppcpp"), input0.output);
     auto graph = dataScope.graph_as_shared_ptr();
     //auto cSession = tensorflow::ClientSession { rootScope };
 

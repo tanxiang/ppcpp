@@ -6,9 +6,5 @@
 #include <tuple>
 #include <vector>
 namespace tfcc {
-//tensorflow::ops::ParseExample getReader(tensorflow::Scope& scope,std::string ,int64_t );
-
-//std::tuple<tensorflow::Output,tensorflow::Output> getReader(tensorflow::Scope& scope,tensorflow::ClientSession& cs,std::string ,int64_t );
-std::tuple<tensorflow::Output,tensorflow::Output> getReader(tensorflow::Scope& scope,tensorflow::ClientSession& cs,std::vector<std::string> ,int64_t );
-
+std::tuple<tensorflow::Output, tensorflow::Output> getReader(tensorflow::Scope& scope, tensorflow::ClientSession& cs, std::vector<std::string>, int64_t);
 }
