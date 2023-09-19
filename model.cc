@@ -45,8 +45,8 @@ auto active(tf::Scope& scope, tf::Output inputs)
 auto Dense(tf::Scope scope, tf::Output inputs, int out_units)
 {
     auto inputShape = tfo::Shape(scope.WithOpName("shape"), inputs);
-    
-    auto weightShape = tfo::Concat(scope.WithOpName("apppend"), { tfo::Const(scope,{3145728}), tfo::Const(scope, { out_units }) }, 0);
+    tfo::Split inputShapes{scope.WithOpName("shapeSplit"),0,inputShape,2};
+    auto weightShape = tfo::Concat(scope.WithOpName("apppend"), { inputShapes[0], tfo::Const(scope, { out_units }) }, 0);
     auto weightsInitial = tfo::RandomNormal(scope, weightShape, inputs.type());
 
     auto weight = tfo::Variable(scope.WithOpName("weight"), {-1,out_units}, inputs.type());
