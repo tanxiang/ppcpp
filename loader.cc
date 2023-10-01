@@ -1,3 +1,4 @@
+
 #include "loader.hh"
 #include <tensorflow/cc/client/client_session.h>
 #include <tensorflow/cc/framework/scope.h>
@@ -21,10 +22,8 @@
 #include "log.hh"
 
 namespace tfcc {
-
 namespace tf = tensorflow;
 namespace tfo = tensorflow::ops;
-
 
 std::tuple<tensorflow::Output,tensorflow::Output> getReader(tf::Scope& scope,tf::ClientSession& cs,std::vector<std::string> fileNames,int64_t numRecoder)
 {

@@ -89,15 +89,15 @@ blockOutput Conv(tf::Scope scope, tf::Output& inputs,int inChannel , int outChan
 
 auto Dropout(tf::Scope scope, tf::Input inputs) { }
 
-blockOutput Flatten(tf::Scope scope, tf::Input inputs,int inChannel , int outChannel)
+blockOutput Flatten(tf::Scope scope, tf::Output inputs,int inChannel , int outChannel)
 {
-    
     return {tfo::Reshape{scope.WithOpName("reshape"), inputs, { -1, outChannel}},outChannel};
 }
 
 auto Gap(tf::Scope scope, tf::Input inputs)
 {
     auto inputShape = tfo::Shape(scope.WithOpName("shape"), inputs);
+    //scope.DoShapeInference(nullptr);
     // return tfo::AvgPool(scope, inputs, {-1});
 }
 
@@ -115,9 +115,9 @@ tf::Output buildPPC(tf::Scope scope, tensorflow::Output& input)
 
     x = buildInputBlocks(scope.NewSubScope("head1"), x.output,x.channelNum,128);
     x = buildInputBlocks(scope.NewSubScope("head2"), x.output,x.channelNum,512);
-    x = Flatten(scope.NewSubScope("head3"), x.output,x.channelNum,1024);
+    x = Flatten(scope.NewSubScope("head3"), x.output,x.channelNum,1020);
     x = Dense(scope.NewSubScope("body0"), x.output,x.channelNum, 3560);
-    x = Dense(scope.NewSubScope("body1"), x.output,x.channelNum, 3700);
+    x = Dense(scope.NewSubScope("body1"), x.output,x.channelNum, 3755);
 
     tfo::SparseSoftmaxCrossEntropyWithLogits CSWL { scope.WithOpName("crossEntropy"), x.output, labels };
 
